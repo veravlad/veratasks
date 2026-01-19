@@ -23,6 +23,8 @@ Copilot must **read and follow these rules before providing any suggestions**.
 - **React Query** – Server state management.
 - **shadcn/ui** – UI components.
 - **lucide-react** – Icons.
+- **Zustand** – Global state management.
+- **React Router** – Application routing and navigation.
 
 > Copilot must not suggest alternative libraries.
 
@@ -50,6 +52,8 @@ Copilot must **read and follow these rules before providing any suggestions**.
 5. Always use **date-fns** for date manipulation; do not use native `Date` methods directly.
 6. Form validation must use **react-hook-form + zod**.
 7. Write code for **reusability**: extract repeated logic into hooks or utils.
+8. Use **Zustand** for global state management instead of React Context or Redux.
+9. Use **React Router** for navigation and routing instead of manual state management.
 
 ---
 
@@ -90,9 +94,7 @@ export function formatDate(date: Date): string {
 }
 ```
 
-
 ### Form validation
-
 ```ts
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -103,5 +105,38 @@ const schema = z.object({
 });
 
 const form = useForm({ resolver: zodResolver(schema) });
+```
 
+### Global state with Zustand
+```ts
+import { create } from 'zustand'
+
+interface AppState {
+  user: User | null
+  isAuthenticated: boolean
+  setUser: (user: User | null) => void
+}
+
+export const useAppStore = create<AppState>((set) => ({
+  user: null,
+  isAuthenticated: false,
+  setUser: (user) => set({ user, isAuthenticated: !!user }),
+}))
+```
+
+### Navigation with React Router
+```tsx
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/tasks" element={<TasksPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
 ```
