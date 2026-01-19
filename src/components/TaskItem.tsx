@@ -10,7 +10,8 @@ import {
   Clock, 
   Calendar,
   Edit,
-  Trash2
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -35,6 +36,8 @@ interface TaskItemProps {
   onEdit: (taskId: string) => void;
   onDelete: (taskId: string) => void;
   isActive?: boolean;
+  isLoading?: boolean;
+  pendingOperations?: Set<string>;
 }
 
 export function TaskItem({
@@ -46,6 +49,8 @@ export function TaskItem({
   onEdit,
   onDelete,
   isActive = false,
+  isLoading = false,
+  pendingOperations = new Set(),
 }: TaskItemProps) {
   const [showDetails, setShowDetails] = useState(false);
 
@@ -54,11 +59,18 @@ export function TaskItem({
   const canComplete = task.status === 'active' || task.status === 'new';
   const canCancel = task.status !== 'completed' && task.status !== 'cancelled';
 
+  // Verificar si hay operaciones pendientes para esta tarea
+  const isTaskPending = pendingOperations.has(task.id);
+  const isAnyOperationPending = isLoading || isTaskPending;
+
   return (
-    <Card className={`p-4 transition-all ${isActive ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}>
+    <Card className={`p-4 transition-all ${isActive ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${isAnyOperationPending ? 'opacity-75' : ''}`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
+            {isAnyOperationPending && (
+              <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+            )}
             <h3 className="font-medium text-lg truncate">{task.title}</h3>
             <Badge className={getStatusColor(task.status)}>
               {getStatusLabel(task.status)}
@@ -129,7 +141,8 @@ export function TaskItem({
                 size="sm"
                 variant="outline"
                 onClick={() => onStart(task.id)}
-                className="text-green-600 hover:text-green-700"
+                disabled={isAnyOperationPending}
+                className="text-green-600 hover:text-green-700 disabled:opacity-50"
               >
                 <Play className="w-4 h-4" />
               </Button>
@@ -140,7 +153,8 @@ export function TaskItem({
                 size="sm"
                 variant="outline"
                 onClick={() => onPause(task.id)}
-                className="text-orange-600 hover:text-orange-700"
+                disabled={isAnyOperationPending}
+                className="text-orange-600 hover:text-orange-700 disabled:opacity-50"
               >
                 <Pause className="w-4 h-4" />
               </Button>
@@ -151,7 +165,8 @@ export function TaskItem({
                 size="sm"
                 variant="outline"
                 onClick={() => onComplete(task.id)}
-                className="text-blue-600 hover:text-blue-700"
+                disabled={isAnyOperationPending}
+                className="text-blue-600 hover:text-blue-700 disabled:opacity-50"
               >
                 <CheckCircle className="w-4 h-4" />
               </Button>
@@ -162,7 +177,8 @@ export function TaskItem({
                 size="sm"
                 variant="outline"
                 onClick={() => onCancel(task.id)}
-                className="text-red-600 hover:text-red-700"
+                disabled={isAnyOperationPending}
+                className="text-red-600 hover:text-red-700 disabled:opacity-50"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -175,7 +191,8 @@ export function TaskItem({
               size="sm"
               variant="ghost"
               onClick={() => onEdit(task.id)}
-              className="text-gray-600 hover:text-gray-700"
+              disabled={isAnyOperationPending}
+              className="text-gray-600 hover:text-gray-700 disabled:opacity-50"
             >
               <Edit className="w-4 h-4" />
             </Button>
@@ -184,7 +201,8 @@ export function TaskItem({
               size="sm"
               variant="ghost"
               onClick={() => onDelete(task.id)}
-              className="text-red-600 hover:text-red-700"
+              disabled={isAnyOperationPending}
+              className="text-red-600 hover:text-red-700 disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4" />
             </Button>

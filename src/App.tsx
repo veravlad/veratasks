@@ -67,6 +67,9 @@ function AppContent() {
     activeTaskId,
     isLoading,
     error,
+    isCreating,
+    isUpdating,
+    isDeleting,
     createTask,
     updateTask,
     deleteTask,
@@ -165,6 +168,8 @@ function AppContent() {
                     size="sm"
                     variant="outline"
                     onClick={() => pauseTask(activeTask.id)}
+                    disabled={isUpdating}
+                    className="disabled:opacity-50"
                   >
                     <PauseCircle className="w-4 h-4" />
                     Pausar
@@ -207,7 +212,8 @@ function AppContent() {
               <Button
                 variant="outline"
                 onClick={() => setShowTaskForm(true)}
-                className="w-full flex items-center gap-2"
+                disabled={isCreating || isUpdating || isDeleting}
+                className="w-full flex items-center gap-2 disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
                 Nueva Tarea
@@ -274,7 +280,7 @@ function AppContent() {
                   <div>
                     <div className="flex items-center justify-between mb-6">
                       <h2 className="text-xl font-semibold">Gestión de Tareas</h2>
-                      <Button onClick={() => setShowTaskForm(true)}>
+                      <Button onClick={() => setShowTaskForm(true)} disabled={isCreating || isUpdating || isDeleting} className="disabled:opacity-50">
                         <Plus className="w-4 h-4 mr-2" />
                         Nueva Tarea
                       </Button>
@@ -283,6 +289,8 @@ function AppContent() {
                     <TaskList
                       tasks={tasks}
                       activeTaskId={activeTaskId}
+                      isUpdating={isUpdating}
+                      isDeleting={isDeleting}
                       onStart={startTask}
                       onPause={pauseTask}
                       onComplete={completeTask}

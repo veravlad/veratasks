@@ -410,6 +410,11 @@ export function useSupabaseTasks() {
     isLoading,
     error,
     
+    // Estados de carga de mutations
+    isCreating: createTaskMutation.isPending,
+    isUpdating: updateTaskMutation.isPending,
+    isDeleting: deleteTaskMutation.isPending,
+    
     // Acciones CRUD
     createTask,
     updateTask,

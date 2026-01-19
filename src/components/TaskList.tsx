@@ -17,6 +17,8 @@ interface TaskListProps {
   onCancel: (taskId: string) => void;
   onEdit: (taskId: string) => void;
   onDelete: (taskId: string) => void;
+  isUpdating?: boolean;
+  isDeleting?: boolean;
 }
 
 type SortOption = 'created' | 'priority' | 'status' | 'title';
@@ -31,6 +33,8 @@ export function TaskList({
   onCancel,
   onEdit,
   onDelete,
+  isUpdating = false,
+  isDeleting = false,
 }: TaskListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<TaskStatus | 'all'>('all');
@@ -210,6 +214,7 @@ export function TaskList({
               key={task.id}
               task={task}
               isActive={task.id === activeTaskId}
+              isLoading={isUpdating || isDeleting}
               onStart={onStart}
               onPause={onPause}
               onComplete={onComplete}
