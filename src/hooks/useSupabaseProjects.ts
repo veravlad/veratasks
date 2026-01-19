@@ -123,13 +123,19 @@ export function useSupabaseProjects() {
       
       const now = new Date()
 
+      // Convertir campos del frontend al formato de la base de datos
+      const updateData: Partial<ProjectRow> = {}
+      
+      if (data.name !== undefined) updateData.name = data.name
+      if (data.description !== undefined) updateData.description = data.description
+      if (data.color !== undefined) updateData.color = data.color
+      if (data.isArchived !== undefined) updateData.is_archived = data.isArchived
+      
+      updateData.updated_at = now.toISOString()
+
       const { error } = await supabase
         .from('projects')
-        .update({
-          ...data,
-          is_archived: data.isArchived,
-          updated_at: now.toISOString(),
-        })
+        .update(updateData)
         .eq('id', projectId)
 
       if (error) throw error
