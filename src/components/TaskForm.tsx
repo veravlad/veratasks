@@ -3,7 +3,7 @@
  */
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Edit3 } from 'lucide-react';
+import { Plus, Edit3, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -16,11 +16,12 @@ import type { Task } from '../types/task';
 interface TaskFormProps {
   onSubmit: (data: CreateTaskData | UpdateTaskData) => void;
   onCancel?: () => void;
+  onDelete?: (taskId: string) => void;
   isOpen?: boolean;
   editingTask?: Task;
 }
 
-export function TaskForm({ onSubmit, onCancel, isOpen = true, editingTask }: TaskFormProps) {
+export function TaskForm({ onSubmit, onCancel, onDelete, isOpen = true, editingTask }: TaskFormProps) {
   const isEditing = !!editingTask;
   const schema = isEditing ? UpdateTaskSchema : CreateTaskSchema;
   const { projects } = useSupabaseProjects();
@@ -154,6 +155,21 @@ export function TaskForm({ onSubmit, onCancel, isOpen = true, editingTask }: Tas
           {onCancel && (
             <Button type="button" variant="secondary" onClick={onCancel}>
               Cancelar
+            </Button>
+          )}
+          {isEditing && onDelete && (
+            <Button 
+              type="button" 
+              variant="destructive" 
+              onClick={() => {
+                if (confirm('¿Estás seguro de eliminar esta tarea? Esta acción no se puede deshacer.')) {
+                  onDelete(editingTask!.id)
+                }
+              }}
+              className="ml-auto"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Eliminar
             </Button>
           )}
         </div>

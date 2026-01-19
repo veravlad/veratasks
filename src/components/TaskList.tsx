@@ -18,7 +18,6 @@ interface TaskListProps {
   onComplete: (taskId: string) => void;
   onCancel: (taskId: string) => void;
   onEdit: (taskId: string) => void;
-  onDelete: (taskId: string) => void;
   onArchive: (taskId: string) => void;
   onUnarchive: (taskId: string) => void;
   onToggleShowArchived: () => void;
@@ -38,7 +37,6 @@ export function TaskList({
   onComplete,
   onCancel,
   onEdit,
-  onDelete,
   onArchive,
   onUnarchive,
   onToggleShowArchived,
@@ -271,7 +269,6 @@ export function TaskList({
               onComplete={onComplete}
               onCancel={onCancel}
               onEdit={onEdit}
-              onDelete={onDelete}
               onArchive={onArchive}
               onUnarchive={onUnarchive}
             />

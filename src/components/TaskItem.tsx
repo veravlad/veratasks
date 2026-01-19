@@ -10,7 +10,6 @@ import {
   Clock, 
   Calendar,
   Edit,
-  Trash2,
   Archive,
   ArchiveRestore,
   ExternalLink,
@@ -37,7 +36,6 @@ interface TaskItemProps {
   onComplete: (taskId: string) => void;
   onCancel: (taskId: string) => void;
   onEdit: (taskId: string) => void;
-  onDelete: (taskId: string) => void;
   onArchive: (taskId: string) => void;
   onUnarchive?: (taskId: string) => void;
   isActive?: boolean;
@@ -52,7 +50,6 @@ export function TaskItem({
   onComplete,
   onCancel,
   onEdit,
-  onDelete,
   onArchive,
   onUnarchive,
   isActive = false,
@@ -258,16 +255,6 @@ export function TaskItem({
                 <Archive className="w-4 h-4" />
               </Button>
             )}
-
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onDelete(task.id)}
-              disabled={isAnyOperationPending}
-              className="text-red-600 hover:text-red-700 disabled:opacity-50"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
           </div>
 
           {/* Botón para mostrar/ocultar detalles */}

@@ -132,6 +132,12 @@ function AppContent() {
     setShowArchived(prev => !prev)
   }
 
+  const handleDeleteTask = (taskId: string) => {
+    deleteTask(taskId)
+    setEditingTaskId(null)
+    setShowTaskForm(false)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -272,6 +278,7 @@ function AppContent() {
                   <TaskForm
                     onSubmit={handleTaskSubmit}
                     onCancel={handleCancelForm}
+                    onDelete={handleDeleteTask}
                     editingTask={editingTask || undefined}
                   />
                 </div>
@@ -302,7 +309,6 @@ function AppContent() {
                       onComplete={completeTask}
                       onCancel={cancelTask}
                       onEdit={handleEditTask}
-                      onDelete={deleteTask}
                       onArchive={archiveTask}
                       onUnarchive={unarchiveTask}
                       onToggleShowArchived={handleToggleShowArchived}
