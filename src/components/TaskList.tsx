@@ -6,6 +6,7 @@ import { Search, Filter, SortAsc, SortDesc } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { TaskItem } from './TaskItem';
+import { useSupabaseProjects } from '../hooks/useSupabaseProjects';
 import type { Task, TaskStatus, TaskPriority } from '../types/task';
 
 interface TaskListProps {
@@ -39,8 +40,11 @@ export function TaskList({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<TaskStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | 'all'>('all');
+  const [projectFilter, setProjectFilter] = useState<string | 'all'>('all');
   const [sortBy, setSortBy] = useState<SortOption>('created');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  const { projects } = useSupabaseProjects();
 
   const filteredAndSortedTasks = useMemo(() => {
     let filtered = tasks;
@@ -61,6 +65,15 @@ export function TaskList({
     // Filtro por prioridad
     if (priorityFilter !== 'all') {
       filtered = filtered.filter(task => task.priority === priorityFilter);
+    }
+
+    // Filtro por proyecto
+    if (projectFilter !== 'all') {
+      if (projectFilter === 'none') {
+        filtered = filtered.filter(task => !task.projectId);
+      } else {
+        filtered = filtered.filter(task => task.projectId === projectFilter);
+      }
     }
 
     // Ordenación
@@ -103,7 +116,7 @@ export function TaskList({
     });
 
     return filtered;
-  }, [tasks, searchTerm, statusFilter, priorityFilter, sortBy, sortDirection]);
+  }, [tasks, searchTerm, statusFilter, priorityFilter, projectFilter, sortBy, sortDirection]);
 
   const toggleSort = () => {
     setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
@@ -153,6 +166,22 @@ export function TaskList({
                 <option value="high">Alta</option>
                 <option value="medium">Media</option>
                 <option value="low">Baja</option>
+              </select>
+            </div>
+
+            <div>
+              <select
+                value={projectFilter}
+                onChange={(e) => setProjectFilter(e.target.value)}
+                className="px-3 py-2 border rounded-md text-sm"
+              >
+                <option value="all">Todos los proyectos</option>
+                <option value="none">Sin proyecto</option>
+                {projects.map(project => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
               </select>
             </div>
 

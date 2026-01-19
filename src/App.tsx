@@ -9,20 +9,22 @@ import {
   FileText,
   PlayCircle,
   PauseCircle,
-  LogOut
+  LogOut,
+  Folder
 } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { TaskForm } from './components/TaskForm'
 import { TaskList } from './components/TaskList'
 import { TaskStats } from './components/TaskStats'
 import { ImportExport } from './components/ImportExport'
+import { ProjectList } from './components/ProjectList'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { useSupabaseTasks } from './hooks/useSupabaseTasks'
 import { useAuthStore } from './stores/authStore'
 import type { CreateTaskData, UpdateTaskData } from './schemas/task'
 import type { LucideIcon } from 'lucide-react'
 
-type View = 'tasks' | 'stats' | 'import-export'
+type View = 'tasks' | 'projects' | 'stats' | 'import-export'
 
 interface NavigationButtonProps {
   view: View;
@@ -193,6 +195,13 @@ function AppContent() {
                 onViewChange={setCurrentView}
               />
               <NavigationButton
+                view="projects"
+                icon={Folder}
+                label="Proyectos"
+                currentView={currentView}
+                onViewChange={setCurrentView}
+              />
+              <NavigationButton
                 view="stats"
                 icon={BarChart3}
                 label="Estadísticas"
@@ -298,6 +307,12 @@ function AppContent() {
                       onEdit={handleEditTask}
                       onDelete={deleteTask}
                     />
+                  </div>
+                )}
+
+                {currentView === 'projects' && (
+                  <div>
+                    <ProjectList />
                   </div>
                 )}
 

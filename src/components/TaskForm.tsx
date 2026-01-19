@@ -10,6 +10,7 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Card } from './ui/card';
 import { CreateTaskSchema, UpdateTaskSchema, type CreateTaskData, type UpdateTaskData } from '../schemas/task';
+import { useSupabaseProjects } from '../hooks/useSupabaseProjects';
 import type { Task } from '../types/task';
 
 interface TaskFormProps {
@@ -22,6 +23,7 @@ interface TaskFormProps {
 export function TaskForm({ onSubmit, onCancel, isOpen = true, editingTask }: TaskFormProps) {
   const isEditing = !!editingTask;
   const schema = isEditing ? UpdateTaskSchema : CreateTaskSchema;
+  const { projects } = useSupabaseProjects();
   
   const {
     register,
@@ -35,10 +37,12 @@ export function TaskForm({ onSubmit, onCancel, isOpen = true, editingTask }: Tas
       description: editingTask.description || '',
       priority: editingTask.priority,
       estimatedTime: editingTask.estimatedTime,
+      projectId: editingTask.projectId || undefined,
     } : {
       title: '',
       description: '',
       priority: 'medium',
+      projectId: undefined,
     },
   });
 
@@ -89,6 +93,25 @@ export function TaskForm({ onSubmit, onCancel, isOpen = true, editingTask }: Tas
           />
           {errors.description && (
             <p className="text-sm text-red-600">{errors.description.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="projectId">Proyecto</Label>
+          <select
+            id="projectId"
+            {...register('projectId')}
+            className="px-3 py-2 border rounded-md text-sm w-full"
+          >
+            <option value="">Sin proyecto</option>
+            {projects.map(project => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}
+          </select>
+          {errors.projectId && (
+            <p className="text-sm text-red-600">{errors.projectId.message}</p>
           )}
         </div>
 

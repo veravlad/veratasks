@@ -78,6 +78,14 @@ export function TaskItem({
             <Badge className={getPriorityColor(task.priority)}>
               {getPriorityLabel(task.priority)}
             </Badge>
+            {task.project && (
+              <Badge 
+                className="text-white"
+                style={{ backgroundColor: task.project.color }}
+              >
+                {task.project.name}
+              </Badge>
+            )}
           </div>
 
           {task.description && (

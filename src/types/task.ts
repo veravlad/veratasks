@@ -6,6 +6,23 @@ export type TaskStatus = 'new' | 'active' | 'completed' | 'cancelled';
 
 export type TaskPriority = 'low' | 'medium' | 'high';
 
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  isArchived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ProjectStats {
+  totalTasks: number;
+  completedTasks: number;
+  activeTasks: number;
+  completionRate: number;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -14,6 +31,8 @@ export interface Task {
   status: TaskStatus;
   estimatedTime?: number; // en minutos
   actualTime?: number; // tiempo real en minutos
+  projectId?: string;
+  project?: Project;
   createdAt: Date;
   startedAt?: Date;
   completedAt?: Date;
@@ -40,6 +59,7 @@ export interface TaskStats {
 
 export interface ExportData {
   tasks: Task[];
+  projects: Project[];
   exportedAt: Date;
   version: string;
 }

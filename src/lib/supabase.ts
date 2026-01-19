@@ -26,6 +26,11 @@ export interface Database {
         Insert: TaskHistoryInsert
         Update: TaskHistoryUpdate
       }
+      projects: {
+        Row: ProjectRow
+        Insert: ProjectInsert
+        Update: ProjectUpdate
+      }
     }
   }
 }
@@ -39,6 +44,7 @@ export interface TaskRow {
   status: 'new' | 'active' | 'completed' | 'cancelled'
   estimated_time: number | null
   actual_time: number | null
+  project_id: string | null
   created_at: string
   started_at: string | null
   completed_at: string | null
@@ -55,6 +61,7 @@ export interface TaskInsert {
   status: 'new' | 'active' | 'completed' | 'cancelled'
   estimated_time?: number | null
   actual_time?: number | null
+  project_id?: string | null
   created_at?: string
   started_at?: string | null
   completed_at?: string | null
@@ -68,6 +75,7 @@ export interface TaskUpdate {
   status?: 'new' | 'active' | 'completed' | 'cancelled'
   estimated_time?: number | null
   actual_time?: number | null
+  project_id?: string | null
   started_at?: string | null
   completed_at?: string | null
   cancelled_at?: string | null
@@ -92,4 +100,33 @@ export interface TaskHistoryInsert {
 
 export interface TaskHistoryUpdate {
   time_in_status?: number | null
+}
+
+export interface ProjectRow {
+  id: string
+  user_id: string
+  name: string
+  description: string | null
+  color: string
+  is_archived: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ProjectInsert {
+  id?: string
+  user_id: string
+  name: string
+  description?: string | null
+  color?: string
+  is_archived?: boolean
+  created_at?: string
+}
+
+export interface ProjectUpdate {
+  name?: string
+  description?: string | null
+  color?: string
+  is_archived?: boolean
+  updated_at?: string
 }

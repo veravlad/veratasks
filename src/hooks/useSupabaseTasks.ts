@@ -3,7 +3,7 @@
  */
 import { useState, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase, type TaskRow, type TaskHistoryRow, type TaskInsert } from '../lib/supabase'
+import { supabase, type TaskRow, type TaskHistoryRow, type TaskInsert, type ProjectRow } from '../lib/supabase'
 import { useAuthStore } from '../stores/authStore'
 import type { Task, TaskStatus, ExportData } from '../types/task'
 import type { CreateTaskData, UpdateTaskData } from '../schemas/task'
@@ -12,7 +12,7 @@ import { calculateTimeInMinutes } from '../utils/task'
 /**
  * Convierte TaskRow de Supabase a Task del frontend
  */
-function mapTaskRowToTask(taskRow: TaskRow, history: TaskHistoryRow[] = []): Task {
+function mapTaskRowToTask(taskRow: TaskRow, history: TaskHistoryRow[] = [], project?: ProjectRow): Task {
   return {
     id: taskRow.id,
     title: taskRow.title,
@@ -21,6 +21,16 @@ function mapTaskRowToTask(taskRow: TaskRow, history: TaskHistoryRow[] = []): Tas
     status: taskRow.status,
     estimatedTime: taskRow.estimated_time || undefined,
     actualTime: taskRow.actual_time || undefined,
+    projectId: taskRow.project_id || undefined,
+    project: project ? {
+      id: project.id,
+      name: project.name,
+      description: project.description || undefined,
+      color: project.color,
+      isArchived: project.is_archived,
+      createdAt: new Date(project.created_at),
+      updatedAt: new Date(project.updated_at),
+    } : undefined,
     createdAt: new Date(taskRow.created_at),
     startedAt: taskRow.started_at ? new Date(taskRow.started_at) : undefined,
     completedAt: taskRow.completed_at ? new Date(taskRow.completed_at) : undefined,
@@ -46,6 +56,7 @@ function mapTaskToTaskInsert(task: Partial<Task>, userId: string): Partial<TaskI
     status: task.status!,
     estimated_time: task.estimatedTime || null,
     actual_time: task.actualTime || null,
+    project_id: task.projectId || null,
     created_at: task.createdAt?.toISOString(),
     started_at: task.startedAt?.toISOString() || null,
     completed_at: task.completedAt?.toISOString() || null,
@@ -68,7 +79,18 @@ export function useSupabaseTasks() {
       
       const { data: taskData, error: taskError } = await supabase
         .from('tasks')
-        .select('*')
+        .select(`
+          *,
+          projects (
+            id,
+            name,
+            description,
+            color,
+            is_archived,
+            created_at,
+            updated_at
+          )
+        `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
@@ -93,7 +115,10 @@ export function useSupabaseTasks() {
         return acc
       }, {} as Record<string, TaskHistoryRow[]>)
 
-      return taskData.map(task => mapTaskRowToTask(task, historyByTask[task.id] || []))
+      return taskData.map(task => {
+        const projectData = Array.isArray(task.projects) ? task.projects[0] : task.projects
+        return mapTaskRowToTask(task as TaskRow, historyByTask[task.id] || [], projectData as ProjectRow)
+      })
     },
     enabled: !!userId, // Solo ejecutar query si el usuario está autenticado
   })
@@ -113,6 +138,7 @@ export function useSupabaseTasks() {
         priority: data.priority,
         status: 'new',
         estimatedTime: data.estimatedTime,
+        projectId: data.projectId,
         createdAt: now,
         statusHistory: [
           {
@@ -308,6 +334,7 @@ export function useSupabaseTasks() {
   const exportTasks = useCallback((): string => {
     const exportData: ExportData = {
       tasks,
+      projects: [], // Por ahora no exportamos proyectos desde este hook
       exportedAt: new Date(),
       version: '1.0.0',
     }
