@@ -7,6 +7,7 @@ import {
   Plus, 
   BarChart3, 
   FileText,
+  Database,
   PlayCircle,
   PauseCircle
 } from 'lucide-react'
@@ -15,11 +16,12 @@ import { TaskForm } from './components/TaskForm'
 import { TaskList } from './components/TaskList'
 import { TaskStats } from './components/TaskStats'
 import { ImportExport } from './components/ImportExport'
-import { useTasks } from './hooks/useTasks'
+import { DataMigration } from './components/DataMigration'
+import { useSupabaseTasks } from './hooks/useSupabaseTasks'
 import type { CreateTaskData } from './schemas/task'
 import type { LucideIcon } from 'lucide-react'
 
-type View = 'tasks' | 'stats' | 'import-export'
+type View = 'tasks' | 'stats' | 'import-export' | 'migration'
 
 interface NavigationButtonProps {
   view: View;
@@ -60,6 +62,8 @@ export function App() {
   const {
     tasks,
     activeTaskId,
+    isLoading,
+    error,
     createTask,
     deleteTask,
     startTask,
@@ -69,7 +73,7 @@ export function App() {
     exportTasks,
     importTasks,
     getTask,
-  } = useTasks()
+  } = useSupabaseTasks()
 
   const activeTask = activeTaskId ? getTask(activeTaskId) : null
 
@@ -144,6 +148,13 @@ export function App() {
                 currentView={currentView}
                 onViewChange={setCurrentView}
               />
+              <NavigationButton
+                view="migration"
+                icon={Database}
+                label="Migración"
+                currentView={currentView}
+                onViewChange={setCurrentView}
+              />
               
               <hr className="my-4" />
               
@@ -179,6 +190,24 @@ export function App() {
 
           {/* Main content */}
           <main className="flex-1 p-6">
+            {/* Estado de carga y errores */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Cargando tareas...</p>
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <p className="text-red-800">
+                  Error al cargar las tareas: {error.message}
+                </p>
+              </div>
+            )}
+
             {/* Formulario de nueva tarea (modal simple) */}
             {showTaskForm && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -192,57 +221,74 @@ export function App() {
             )}
 
             {/* Contenido principal según la vista */}
-            {currentView === 'tasks' && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold">Gestión de Tareas</h2>
-                  <Button onClick={() => setShowTaskForm(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nueva Tarea
-                  </Button>
-                </div>
-                
-                <TaskList
-                  tasks={tasks}
-                  activeTaskId={activeTaskId}
-                  onStart={startTask}
-                  onPause={pauseTask}
-                  onComplete={completeTask}
-                  onCancel={cancelTask}
-                  onEdit={handleEditTask}
-                  onDelete={deleteTask}
-                />
-              </div>
-            )}
+            {!isLoading && !error && (
+              <>
+                {currentView === 'tasks' && (
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-xl font-semibold">Gestión de Tareas</h2>
+                      <Button onClick={() => setShowTaskForm(true)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nueva Tarea
+                      </Button>
+                    </div>
+                    
+                    <TaskList
+                      tasks={tasks}
+                      activeTaskId={activeTaskId}
+                      onStart={startTask}
+                      onPause={pauseTask}
+                      onComplete={completeTask}
+                      onCancel={cancelTask}
+                      onEdit={handleEditTask}
+                      onDelete={deleteTask}
+                    />
+                  </div>
+                )}
 
-            {currentView === 'stats' && (
-              <div>
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold">Análisis de Rendimiento</h2>
-                  <p className="text-gray-600">
-                    Revisa tus estadísticas y patrones de productividad
-                  </p>
-                </div>
-                
-                <TaskStats tasks={tasks} />
-              </div>
-            )}
+                {currentView === 'stats' && (
+                  <div>
+                    <div className="mb-6">
+                      <h2 className="text-xl font-semibold">Análisis de Rendimiento</h2>
+                      <p className="text-gray-600">
+                        Revisa tus estadísticas y patrones de productividad
+                      </p>
+                    </div>
+                    
+                    <TaskStats tasks={tasks} />
+                  </div>
+                )}
 
-            {currentView === 'import-export' && (
-              <div>
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold">Gestión de Datos</h2>
-                  <p className="text-gray-600">
-                    Exporta o importa tus tareas para crear respaldos
-                  </p>
-                </div>
-                
-                <ImportExport
-                  onExport={exportTasks}
-                  onImport={importTasks}
-                  tasksCount={tasks.length}
-                />
-              </div>
+                {currentView === 'import-export' && (
+                  <div>
+                    <div className="mb-6">
+                      <h2 className="text-xl font-semibold">Gestión de Datos</h2>
+                      <p className="text-gray-600">
+                        Exporta o importa tus tareas para crear respaldos
+                      </p>
+                    </div>
+                    
+                    <ImportExport
+                      onExport={exportTasks}
+                      onImport={importTasks}
+                      tasksCount={tasks.length}
+                    />
+                  </div>
+                )}
+
+                {currentView === 'migration' && (
+                  <div>
+                    <div className="mb-6">
+                      <h2 className="text-xl font-semibold">Migración a Supabase</h2>
+                      <p className="text-gray-600">
+                        Migra tus datos locales a la nube para mayor seguridad y sincronización
+                      </p>
+                    </div>
+                    
+                    <DataMigration />
+                  </div>
+                )}
+              </>
             )}
           </main>
         </div>

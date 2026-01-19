@@ -9,7 +9,7 @@ import { Label } from './ui/label';
 
 interface ImportExportProps {
   onExport: () => string;
-  onImport: (data: string, replaceExisting?: boolean) => boolean;
+  onImport: (data: string, replaceExisting?: boolean) => Promise<boolean>;
   tasksCount: number;
 }
 
@@ -53,11 +53,11 @@ export function ImportExport({ onExport, onImport, tasksCount }: ImportExportPro
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         setIsProcessing(true);
         const content = e.target?.result as string;
-        const success = onImport(content, importMode === 'replace');
+        const success = await onImport(content, importMode === 'replace');
         
         if (success) {
           setMessage({
