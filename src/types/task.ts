@@ -12,6 +12,7 @@ export interface Project {
   description?: string;
   color: string;
   isArchived: boolean;
+  azureDevOpsBoardUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }

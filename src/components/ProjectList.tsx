@@ -2,7 +2,7 @@
  * Componente para gestionar proyectos
  */
 import { useState } from 'react'
-import { Plus, Edit, Archive, Trash2, Folder } from 'lucide-react'
+import { Plus, Edit, Archive, Trash2, Folder, ExternalLink } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
 import { Badge } from './ui/badge'
@@ -221,6 +221,22 @@ function ProjectCard({
           </p>
         )}
 
+        {/* Azure DevOps Board Link */}
+        {project.azureDevOpsBoardUrl && (
+          <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-md border border-blue-200">
+            <ExternalLink className="w-3 h-3 text-blue-600" />
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                window.open(project.azureDevOpsBoardUrl, '_blank')
+              }}
+              className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+            >
+              Abrir Azure DevOps Board
+            </button>
+          </div>
+        )}
+
         {/* Acciones */}
         <div className="flex items-center justify-between pt-2">
           <div className="flex gap-1">
@@ -300,6 +316,7 @@ function ProjectForm({ onSubmit, onCancel, editingProject }: ProjectFormProps) {
   const [name, setName] = useState(editingProject?.name || '')
   const [description, setDescription] = useState(editingProject?.description || '')
   const [color, setColor] = useState(editingProject?.color || '#3b82f6')
+  const [azureDevOpsBoardUrl, setAzureDevOpsBoardUrl] = useState(editingProject?.azureDevOpsBoardUrl || '')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -310,6 +327,7 @@ function ProjectForm({ onSubmit, onCancel, editingProject }: ProjectFormProps) {
       name: name.trim(),
       description: description.trim() || undefined,
       color,
+      azureDevOpsBoardUrl: azureDevOpsBoardUrl.trim() || undefined,
     })
   }
 
@@ -346,6 +364,20 @@ function ProjectForm({ onSubmit, onCancel, editingProject }: ProjectFormProps) {
             placeholder="Descripción opcional"
             rows={3}
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">URL de Azure DevOps Board</label>
+          <input
+            type="url"
+            value={azureDevOpsBoardUrl}
+            onChange={(e) => setAzureDevOpsBoardUrl(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="https://dev.azure.com/organization/project/_boards/board/..."
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Opcional: Enlace al board de Azure DevOps relacionado con este proyecto
+          </p>
         </div>
 
         <div>

@@ -13,6 +13,7 @@ import {
   Trash2,
   Archive,
   ArchiveRestore,
+  ExternalLink,
   Loader2
 } from 'lucide-react';
 import { Button } from './ui/button';
@@ -103,6 +104,22 @@ export function TaskItem({
             <p className="text-gray-600 text-sm mb-2 line-clamp-2">
               {task.description}
             </p>
+          )}
+
+          {/* Azure DevOps Board Link */}
+          {task.project?.azureDevOpsBoardUrl && (
+            <div className="flex items-center gap-1 mb-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  window.open(task.project!.azureDevOpsBoardUrl, '_blank')
+                }}
+                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline bg-blue-50 px-2 py-1 rounded border border-blue-200"
+              >
+                <ExternalLink className="w-3 h-3" />
+                Abrir en Azure DevOps
+              </button>
+            </div>
           )}
 
           <div className="flex items-center gap-4 text-xs text-gray-500">

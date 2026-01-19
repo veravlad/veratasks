@@ -18,6 +18,7 @@ function mapProjectRowToProject(projectRow: ProjectRow): Project {
     description: projectRow.description || undefined,
     color: projectRow.color,
     isArchived: projectRow.is_archived,
+    azureDevOpsBoardUrl: projectRow.azure_devops_board_url || undefined,
     createdAt: new Date(projectRow.created_at),
     updatedAt: new Date(projectRow.updated_at),
   }
@@ -34,6 +35,7 @@ function mapProjectToProjectInsert(project: Partial<Project>, userId: string): P
     description: project.description || null,
     color: project.color || '#3b82f6',
     is_archived: project.isArchived || false,
+    azure_devops_board_url: project.azureDevOpsBoardUrl || null,
     created_at: project.createdAt?.toISOString(),
   }
 }

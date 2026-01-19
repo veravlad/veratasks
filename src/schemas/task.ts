@@ -8,6 +8,7 @@ export const CreateProjectSchema = z.object({
   name: z.string().min(1, 'El nombre del proyecto es requerido').max(50, 'El nombre es muy largo'),
   description: z.string().optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Color debe ser un código hexadecimal válido').default('#3b82f6'),
+  azureDevOpsBoardUrl: z.string().url('Debe ser una URL válida').optional().or(z.literal('')),
 });
 
 export const UpdateProjectSchema = z.object({
@@ -15,6 +16,7 @@ export const UpdateProjectSchema = z.object({
   description: z.string().optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Color debe ser un código hexadecimal válido').optional(),
   isArchived: z.boolean().optional(),
+  azureDevOpsBoardUrl: z.string().url('Debe ser una URL válida').optional().or(z.literal('')),
 });
 
 export const CreateTaskSchema = z.object({

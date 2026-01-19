@@ -112,6 +112,7 @@ export interface ProjectRow {
   description: string | null
   color: string
   is_archived: boolean
+  azure_devops_board_url: string | null
   created_at: string
   updated_at: string
 }
@@ -123,6 +124,7 @@ export interface ProjectInsert {
   description?: string | null
   color?: string
   is_archived?: boolean
+  azure_devops_board_url?: string | null
   created_at?: string
 }
 
@@ -131,5 +133,6 @@ export interface ProjectUpdate {
   description?: string | null
   color?: string
   is_archived?: boolean
+  azure_devops_board_url?: string | null
   updated_at?: string
 }
