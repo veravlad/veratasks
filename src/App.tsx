@@ -60,6 +60,7 @@ function AppContent() {
   const [currentView, setCurrentView] = useState<View>('tasks')
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [showArchived, setShowArchived] = useState(false)
   const { user, signOut } = useAuthStore()
   
   const {
@@ -77,8 +78,10 @@ function AppContent() {
     pauseTask,
     completeTask,
     cancelTask,
+    archiveTask,
+    unarchiveTask,
     getTask,
-  } = useSupabaseTasks()
+  } = useSupabaseTasks(showArchived)
 
   /**
    * Maneja el cierre de sesión
@@ -123,6 +126,10 @@ function AppContent() {
   const handleCancelForm = () => {
     setShowTaskForm(false)
     setEditingTaskId(null)
+  }
+
+  const handleToggleShowArchived = () => {
+    setShowArchived(prev => !prev)
   }
 
   return (
@@ -287,6 +294,7 @@ function AppContent() {
                     <TaskList
                       tasks={tasks}
                       activeTaskId={activeTaskId}
+                      showArchived={showArchived}
                       isUpdating={isUpdating}
                       isDeleting={isDeleting}
                       onStart={startTask}
@@ -295,6 +303,9 @@ function AppContent() {
                       onCancel={cancelTask}
                       onEdit={handleEditTask}
                       onDelete={deleteTask}
+                      onArchive={archiveTask}
+                      onUnarchive={unarchiveTask}
+                      onToggleShowArchived={handleToggleShowArchived}
                     />
                   </div>
                 )}

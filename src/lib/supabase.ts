@@ -45,6 +45,7 @@ export interface TaskRow {
   estimated_time: number | null
   actual_time: number | null
   project_id: string | null
+  is_archived: boolean
   created_at: string
   started_at: string | null
   completed_at: string | null
@@ -62,6 +63,7 @@ export interface TaskInsert {
   estimated_time?: number | null
   actual_time?: number | null
   project_id?: string | null
+  is_archived?: boolean
   created_at?: string
   started_at?: string | null
   completed_at?: string | null
@@ -76,6 +78,7 @@ export interface TaskUpdate {
   estimated_time?: number | null
   actual_time?: number | null
   project_id?: string | null
+  is_archived?: boolean
   started_at?: string | null
   completed_at?: string | null
   cancelled_at?: string | null

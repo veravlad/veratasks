@@ -33,6 +33,7 @@ export interface Task {
   actualTime?: number; // tiempo real en minutos
   projectId?: string;
   project?: Project;
+  isArchived: boolean;
   createdAt: Date;
   startedAt?: Date;
   completedAt?: Date;

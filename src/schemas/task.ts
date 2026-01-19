@@ -32,6 +32,7 @@ export const UpdateTaskSchema = z.object({
   estimatedTime: z.number().min(1, 'El tiempo estimado debe ser mayor a 0').optional(),
   status: z.enum(['new', 'active', 'completed', 'cancelled'] as const).optional(),
   projectId: z.string().uuid('ID de proyecto inválido').optional(),
+  isArchived: z.boolean().optional(),
 });
 
 export type CreateTaskData = z.infer<typeof CreateTaskSchema>;

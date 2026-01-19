@@ -12,12 +12,16 @@ import type { Task, TaskStatus, TaskPriority } from '../types/task';
 interface TaskListProps {
   tasks: Task[];
   activeTaskId: string | null;
+  showArchived: boolean;
   onStart: (taskId: string) => void;
   onPause: (taskId: string) => void;
   onComplete: (taskId: string) => void;
   onCancel: (taskId: string) => void;
   onEdit: (taskId: string) => void;
   onDelete: (taskId: string) => void;
+  onArchive: (taskId: string) => void;
+  onUnarchive: (taskId: string) => void;
+  onToggleShowArchived: () => void;
   isUpdating?: boolean;
   isDeleting?: boolean;
 }
@@ -28,12 +32,16 @@ type SortDirection = 'asc' | 'desc';
 export function TaskList({
   tasks,
   activeTaskId,
+  showArchived,
   onStart,
   onPause,
   onComplete,
   onCancel,
   onEdit,
   onDelete,
+  onArchive,
+  onUnarchive,
+  onToggleShowArchived,
   isUpdating = false,
   isDeleting = false,
 }: TaskListProps) {
@@ -140,7 +148,21 @@ export function TaskList({
           </div>
 
           {/* Filtros y ordenación */}
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 items-center">
+            {/* Switch para mostrar archivadas */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="showArchived"
+                checked={showArchived}
+                onChange={onToggleShowArchived}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label htmlFor="showArchived" className="text-sm text-gray-600">
+                Mostrar archivadas
+              </label>
+            </div>
+
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-gray-500" />
               <select
@@ -250,6 +272,8 @@ export function TaskList({
               onCancel={onCancel}
               onEdit={onEdit}
               onDelete={onDelete}
+              onArchive={onArchive}
+              onUnarchive={onUnarchive}
             />
           ))}
         </div>

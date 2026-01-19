@@ -31,6 +31,7 @@ function mapTaskRowToTask(taskRow: TaskRow, history: TaskHistoryRow[] = [], proj
       createdAt: new Date(project.created_at),
       updatedAt: new Date(project.updated_at),
     } : undefined,
+    isArchived: taskRow.is_archived,
     createdAt: new Date(taskRow.created_at),
     startedAt: taskRow.started_at ? new Date(taskRow.started_at) : undefined,
     completedAt: taskRow.completed_at ? new Date(taskRow.completed_at) : undefined,
@@ -57,6 +58,7 @@ function mapTaskToTaskInsert(task: Partial<Task>, userId: string): Partial<TaskI
     estimated_time: task.estimatedTime || null,
     actual_time: task.actualTime || null,
     project_id: task.projectId || null,
+    is_archived: task.isArchived || false,
     created_at: task.createdAt?.toISOString(),
     started_at: task.startedAt?.toISOString() || null,
     completed_at: task.completedAt?.toISOString() || null,
@@ -64,7 +66,7 @@ function mapTaskToTaskInsert(task: Partial<Task>, userId: string): Partial<TaskI
   }
 }
 
-export function useSupabaseTasks() {
+export function useSupabaseTasks(showArchived = false) {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null)
   const queryClient = useQueryClient()
   const { user } = useAuthStore()
@@ -73,11 +75,11 @@ export function useSupabaseTasks() {
 
   // Query para obtener todas las tareas
   const { data: tasks = [], isLoading, error } = useQuery({
-    queryKey: ['tasks', userId],
+    queryKey: ['tasks', userId, showArchived],
     queryFn: async () => {
       if (!userId) throw new Error('User not authenticated')
       
-      const { data: taskData, error: taskError } = await supabase
+      let query = supabase
         .from('tasks')
         .select(`
           *,
@@ -92,6 +94,13 @@ export function useSupabaseTasks() {
           )
         `)
         .eq('user_id', userId)
+      
+      // Filtrar por estado archivado
+      if (!showArchived) {
+        query = query.eq('is_archived', false)
+      }
+      
+      const { data: taskData, error: taskError } = await query
         .order('created_at', { ascending: false })
 
       if (taskError) throw taskError
@@ -139,6 +148,7 @@ export function useSupabaseTasks() {
         status: 'new',
         estimatedTime: data.estimatedTime,
         projectId: data.projectId,
+        isArchived: false,
         createdAt: now,
         statusHistory: [
           {
@@ -170,7 +180,8 @@ export function useSupabaseTasks() {
       return newTask
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId, false] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId, true] })
     },
   })
 
@@ -245,7 +256,8 @@ export function useSupabaseTasks() {
       return updatedTask
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId, false] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId, true] })
     },
   })
 
@@ -271,7 +283,8 @@ export function useSupabaseTasks() {
       if (taskError) throw taskError
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId, false] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId, true] })
     },
   })
 
@@ -322,6 +335,17 @@ export function useSupabaseTasks() {
     }
   }, [activeTaskId, updateTask])
 
+  const archiveTask = useCallback((taskId: string) => {
+    updateTask(taskId, { isArchived: true })
+    if (activeTaskId === taskId) {
+      setActiveTaskId(null)
+    }
+  }, [activeTaskId, updateTask])
+
+  const unarchiveTask = useCallback((taskId: string) => {
+    updateTask(taskId, { isArchived: false })
+  }, [updateTask])
+
   const getTask = useCallback((taskId: string): Task | undefined => {
     return tasks.find(task => task.id === taskId)
   }, [tasks])
@@ -352,7 +376,8 @@ export function useSupabaseTasks() {
     if (tasksError) throw tasksError
 
     setActiveTaskId(null)
-    queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
+    queryClient.invalidateQueries({ queryKey: ['tasks', userId, false] })
+    queryClient.invalidateQueries({ queryKey: ['tasks', userId, true] })
   }, [queryClient, userId])
 
   return {
@@ -377,6 +402,8 @@ export function useSupabaseTasks() {
     pauseTask,
     completeTask,
     cancelTask,
+    archiveTask,
+    unarchiveTask,
     
     // Utilidades
     getTask,

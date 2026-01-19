@@ -11,6 +11,8 @@ import {
   Calendar,
   Edit,
   Trash2,
+  Archive,
+  ArchiveRestore,
   Loader2
 } from 'lucide-react';
 import { Button } from './ui/button';
@@ -35,6 +37,8 @@ interface TaskItemProps {
   onCancel: (taskId: string) => void;
   onEdit: (taskId: string) => void;
   onDelete: (taskId: string) => void;
+  onArchive: (taskId: string) => void;
+  onUnarchive?: (taskId: string) => void;
   isActive?: boolean;
   isLoading?: boolean;
   pendingOperations?: Set<string>;
@@ -48,6 +52,8 @@ export function TaskItem({
   onCancel,
   onEdit,
   onDelete,
+  onArchive,
+  onUnarchive,
   isActive = false,
   isLoading = false,
   pendingOperations = new Set(),
@@ -84,6 +90,11 @@ export function TaskItem({
                 style={{ backgroundColor: task.project.color }}
               >
                 {task.project.name}
+              </Badge>
+            )}
+            {task.isArchived && (
+              <Badge className="bg-gray-500 text-white">
+                Archivada
               </Badge>
             )}
           </div>
@@ -204,6 +215,32 @@ export function TaskItem({
             >
               <Edit className="w-4 h-4" />
             </Button>
+
+            {task.isArchived ? (
+              onUnarchive && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onUnarchive(task.id)}
+                  disabled={isAnyOperationPending}
+                  className="text-blue-600 hover:text-blue-700 disabled:opacity-50"
+                  title="Desarchivar"
+                >
+                  <ArchiveRestore className="w-4 h-4" />
+                </Button>
+              )
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onArchive(task.id)}
+                disabled={isAnyOperationPending}
+                className="text-orange-600 hover:text-orange-700 disabled:opacity-50"
+                title="Archivar"
+              >
+                <Archive className="w-4 h-4" />
+              </Button>
+            )}
 
             <Button
               size="sm"
