@@ -8,14 +8,17 @@ import {
   BarChart3, 
   FileText,
   PlayCircle,
-  PauseCircle
+  PauseCircle,
+  LogOut
 } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { TaskForm } from './components/TaskForm'
 import { TaskList } from './components/TaskList'
 import { TaskStats } from './components/TaskStats'
 import { ImportExport } from './components/ImportExport'
+import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { useSupabaseTasks } from './hooks/useSupabaseTasks'
+import { useAuthStore } from './stores/authStore'
 import type { CreateTaskData } from './schemas/task'
 import type { LucideIcon } from 'lucide-react'
 
@@ -53,9 +56,10 @@ const NavigationButton = ({
   </Button>
 )
 
-export function App() {
+function AppContent() {
   const [currentView, setCurrentView] = useState<View>('tasks')
   const [showTaskForm, setShowTaskForm] = useState(false)
+  const { user, signOut } = useAuthStore()
   
   const {
     tasks,
@@ -72,6 +76,13 @@ export function App() {
     importTasks,
     getTask,
   } = useSupabaseTasks()
+
+  /**
+   * Maneja el cierre de sesión
+   */
+  const handleSignOut = async () => {
+    await signOut()
+  }
 
   const activeTask = activeTaskId ? getTask(activeTaskId) : null
 
@@ -96,6 +107,23 @@ export function App() {
               <div className="flex items-center gap-3">
                 <ListTodo className="w-8 h-8 text-blue-600" />
                 <h1 className="text-2xl font-bold text-gray-900">VeraTasks</h1>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                {user && (
+                  <span className="text-sm text-gray-600">
+                    {user.email}
+                  </span>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Cerrar Sesión
+                </Button>
               </div>
               
               {activeTask && (
@@ -274,6 +302,14 @@ export function App() {
         </div>
       </div>
     </div>
+  )
+}
+
+export function App() {
+  return (
+    <ProtectedRoute>
+      <AppContent />
+    </ProtectedRoute>
   )
 }
 

@@ -4,12 +4,10 @@
 import { useState, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase, type TaskRow, type TaskHistoryRow, type TaskInsert } from '../lib/supabase'
+import { useAuthStore } from '../stores/authStore'
 import type { Task, TaskStatus, ExportData } from '../types/task'
 import type { CreateTaskData, UpdateTaskData } from '../schemas/task'
 import { calculateTimeInMinutes } from '../utils/task'
-
-// Simular user_id por ahora (en una app real vendría de autenticación)
-const USER_ID = 'anonymous-user'
 
 /**
  * Convierte TaskRow de Supabase a Task del frontend
@@ -38,10 +36,10 @@ function mapTaskRowToTask(taskRow: TaskRow, history: TaskHistoryRow[] = []): Tas
 /**
  * Convierte Task del frontend a TaskInsert para Supabase
  */
-function mapTaskToTaskInsert(task: Partial<Task>): Partial<TaskInsert> {
+function mapTaskToTaskInsert(task: Partial<Task>, userId: string): Partial<TaskInsert> {
   return {
     id: task.id,
-    user_id: USER_ID,
+    user_id: userId,
     title: task.title!,
     description: task.description || null,
     priority: task.priority!,
@@ -58,15 +56,20 @@ function mapTaskToTaskInsert(task: Partial<Task>): Partial<TaskInsert> {
 export function useSupabaseTasks() {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null)
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
+
+  const userId = user?.id
 
   // Query para obtener todas las tareas
   const { data: tasks = [], isLoading, error } = useQuery({
-    queryKey: ['tasks', USER_ID],
+    queryKey: ['tasks', userId],
     queryFn: async () => {
+      if (!userId) throw new Error('User not authenticated')
+      
       const { data: taskData, error: taskError } = await supabase
         .from('tasks')
         .select('*')
-        .eq('user_id', USER_ID)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
       if (taskError) throw taskError
@@ -92,11 +95,14 @@ export function useSupabaseTasks() {
 
       return taskData.map(task => mapTaskRowToTask(task, historyByTask[task.id] || []))
     },
+    enabled: !!userId, // Solo ejecutar query si el usuario está autenticado
   })
 
   // Mutation para crear tarea
   const createTaskMutation = useMutation({
     mutationFn: async (data: CreateTaskData) => {
+      if (!userId) throw new Error('User not authenticated')
+      
       const now = new Date()
       const taskId = crypto.randomUUID()
       
@@ -117,7 +123,7 @@ export function useSupabaseTasks() {
       }
 
       // Insertar tarea
-      const taskInsert = mapTaskToTaskInsert(newTask)
+      const taskInsert = mapTaskToTaskInsert(newTask, userId)
       const { error: taskError } = await supabase
         .from('tasks')
         .insert([taskInsert as TaskInsert])
@@ -138,13 +144,15 @@ export function useSupabaseTasks() {
       return newTask
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
     },
   })
 
   // Mutation para actualizar tarea
   const updateTaskMutation = useMutation({
     mutationFn: async ({ taskId, data }: { taskId: string; data: UpdateTaskData }) => {
+      if (!userId) throw new Error('User not authenticated')
+      
       const currentTask = tasks.find(t => t.id === taskId)
       if (!currentTask) throw new Error('Task not found')
 
@@ -198,7 +206,7 @@ export function useSupabaseTasks() {
 
       // Actualizar tarea
       const taskUpdate = {
-        ...mapTaskToTaskInsert(updatedTask),
+        ...mapTaskToTaskInsert(updatedTask, userId),
         updated_at: now.toISOString(),
       }
       const { error } = await supabase
@@ -211,13 +219,15 @@ export function useSupabaseTasks() {
       return updatedTask
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
     },
   })
 
   // Mutation para eliminar tarea
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId: string) => {
+      if (!userId) throw new Error('User not authenticated')
+      
       // Eliminar historial primero
       const { error: historyError } = await supabase
         .from('task_history')
@@ -235,7 +245,7 @@ export function useSupabaseTasks() {
       if (taskError) throw taskError
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
     },
   })
 
@@ -308,6 +318,8 @@ export function useSupabaseTasks() {
   // Importar tareas desde JSON
   const importTasks = useCallback(async (jsonData: string, replaceExisting = false): Promise<boolean> => {
     try {
+      if (!userId) throw new Error('User not authenticated')
+      
       const importData: ExportData = JSON.parse(jsonData)
 
       if (!importData.tasks || !Array.isArray(importData.tasks)) {
@@ -326,7 +338,7 @@ export function useSupabaseTasks() {
         const { error: deleteTasksError } = await supabase
           .from('tasks')
           .delete()
-          .eq('user_id', USER_ID)
+          .eq('user_id', userId)
 
         if (deleteTasksError) throw deleteTasksError
       }
@@ -337,8 +349,7 @@ export function useSupabaseTasks() {
         
         // Insertar tarea
         const taskData = {
-          ...mapTaskToTaskInsert({ ...task, id: taskId }),
-          user_id: USER_ID,
+          ...mapTaskToTaskInsert({ ...task, id: taskId }, userId),
         }
         const { error: taskError } = await supabase
           .from('tasks')
@@ -361,15 +372,17 @@ export function useSupabaseTasks() {
         }
       }
 
-      queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
       return true
     } catch (error) {
       console.error('Error importing tasks:', error)
       return false
     }
-  }, [tasks, queryClient])
+  }, [tasks, queryClient, userId])
 
   const clearAllTasks = useCallback(async () => {
+    if (!userId) throw new Error('User not authenticated')
+    
     // Eliminar historial primero
     const { error: historyError } = await supabase
       .from('task_history')
@@ -382,13 +395,13 @@ export function useSupabaseTasks() {
     const { error: tasksError } = await supabase
       .from('tasks')
       .delete()
-      .eq('user_id', USER_ID)
+      .eq('user_id', userId)
 
     if (tasksError) throw tasksError
 
     setActiveTaskId(null)
-    queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] })
-  }, [queryClient])
+    queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
+  }, [queryClient, userId])
 
   return {
     // Estado
