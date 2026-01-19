@@ -19,5 +19,12 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Permitir exportaciones no-componentes en archivos de UI
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true, allowExportNames: ['cn', 'badgeVariants', 'buttonVariants', 'useComboboxAnchor'] }
+      ]
+    }
   },
 ])
