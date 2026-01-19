@@ -3,7 +3,8 @@
  */
 import { useState, useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import type { Task, TaskStatus, CreateTaskData, UpdateTaskData, ExportData } from '../types/task';
+import type { Task, TaskStatus, ExportData } from '../types/task';
+import type { CreateTaskData, UpdateTaskData } from '../schemas/task';
 import { updateTaskStatusHistory, calculateTimeInMinutes } from '../utils/task';
 
 const TASKS_STORAGE_KEY = 'veratasks-data';
