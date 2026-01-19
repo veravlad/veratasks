@@ -103,22 +103,6 @@ export function TaskItem({
             </p>
           )}
 
-          {/* Azure DevOps Board Link */}
-          {task.project?.azureDevOpsBoardUrl && (
-            <div className="flex items-center gap-1 mb-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  window.open(task.project!.azureDevOpsBoardUrl, '_blank')
-                }}
-                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline bg-blue-50 px-2 py-1 rounded border border-blue-200"
-              >
-                <ExternalLink className="w-3 h-3" />
-                Abrir en Azure DevOps
-              </button>
-            </div>
-          )}
-
           <div className="flex items-center gap-4 text-xs text-gray-500">
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
@@ -159,6 +143,25 @@ export function TaskItem({
                 {task.cancelledAt && (
                   <div>
                     <strong>Cancelada:</strong> {formatTaskDate(task.cancelledAt)}
+                  </div>
+                )}
+                
+                {/* Azure DevOps Board Link */}
+                {task.project?.azureDevOpsBoardUrl && (
+                  <div className="pt-2 mt-3 border-t border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <strong>Azure DevOps:</strong>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          window.open(task.project!.azureDevOpsBoardUrl, '_blank')
+                        }}
+                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        Abrir Board
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

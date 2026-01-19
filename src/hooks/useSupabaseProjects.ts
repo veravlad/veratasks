@@ -100,6 +100,7 @@ export function useSupabaseProjects() {
         description: data.description,
         color: data.color || '#3b82f6',
         isArchived: false,
+        azureDevOpsBoardUrl: data.azureDevOpsBoardUrl,
         createdAt: now,
         updatedAt: now,
       }
@@ -132,6 +133,7 @@ export function useSupabaseProjects() {
       if (data.description !== undefined) updateData.description = data.description
       if (data.color !== undefined) updateData.color = data.color
       if (data.isArchived !== undefined) updateData.is_archived = data.isArchived
+      if (data.azureDevOpsBoardUrl !== undefined) updateData.azure_devops_board_url = data.azureDevOpsBoardUrl || null
       
       updateData.updated_at = now.toISOString()
 

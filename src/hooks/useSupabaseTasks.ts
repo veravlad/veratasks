@@ -30,6 +30,7 @@ function mapTaskRowToTask(taskRow: TaskRow, history: TaskHistoryRow[] = [], proj
       isArchived: project.is_archived,
       createdAt: new Date(project.created_at),
       updatedAt: new Date(project.updated_at),
+      azureDevOpsBoardUrl: project.azure_devops_board_url || undefined,
     } : undefined,
     isArchived: taskRow.is_archived,
     createdAt: new Date(taskRow.created_at),
@@ -89,6 +90,7 @@ export function useSupabaseTasks(showArchived = false) {
             description,
             color,
             is_archived,
+            azure_devops_board_url,
             created_at,
             updated_at
           )
