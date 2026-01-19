@@ -53,6 +53,27 @@ Copilot must **read and follow these rules before providing any suggestions**.
 
 ---
 
+## ✅ Quality Assurance Rules
+
+**MANDATORY:** After any code generation or modification, Copilot must:
+
+1. **Always run `pnpm lint`** to check ESLint compliance.
+2. **Always run `pnpm build`** or equivalent TypeScript compilation check.
+3. **Fix ALL errors** before considering the task complete.
+4. **Never leave TypeScript errors unresolved**.
+5. **Never leave ESLint errors unresolved**.
+6. **ESLint warnings can be ignored** - only errors need to be fixed.
+
+### Validation Commands:
+```bash
+pnpm lint    # Must pass with 0 errors (warnings are acceptable)
+pnpm build   # Must complete successfully
+```
+
+**Zero tolerance policy:** Any TypeScript or ESLint error must be immediately fixed. Warnings are acceptable and can be ignored.
+
+---
+
 ## 📝 Examples
 
 ### Date formatting

@@ -7,7 +7,6 @@ import {
   Plus, 
   BarChart3, 
   FileText,
-  Database,
   PlayCircle,
   PauseCircle
 } from 'lucide-react'
@@ -16,12 +15,11 @@ import { TaskForm } from './components/TaskForm'
 import { TaskList } from './components/TaskList'
 import { TaskStats } from './components/TaskStats'
 import { ImportExport } from './components/ImportExport'
-import { DataMigration } from './components/DataMigration'
 import { useSupabaseTasks } from './hooks/useSupabaseTasks'
 import type { CreateTaskData } from './schemas/task'
 import type { LucideIcon } from 'lucide-react'
 
-type View = 'tasks' | 'stats' | 'import-export' | 'migration'
+type View = 'tasks' | 'stats' | 'import-export'
 
 interface NavigationButtonProps {
   view: View;
@@ -148,13 +146,6 @@ export function App() {
                 currentView={currentView}
                 onViewChange={setCurrentView}
               />
-              <NavigationButton
-                view="migration"
-                icon={Database}
-                label="Migración"
-                currentView={currentView}
-                onViewChange={setCurrentView}
-              />
               
               <hr className="my-4" />
               
@@ -276,18 +267,7 @@ export function App() {
                   </div>
                 )}
 
-                {currentView === 'migration' && (
-                  <div>
-                    <div className="mb-6">
-                      <h2 className="text-xl font-semibold">Migración a Supabase</h2>
-                      <p className="text-gray-600">
-                        Migra tus datos locales a la nube para mayor seguridad y sincronización
-                      </p>
-                    </div>
-                    
-                    <DataMigration />
-                  </div>
-                )}
+
               </>
             )}
           </main>

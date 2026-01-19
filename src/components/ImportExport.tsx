@@ -210,7 +210,7 @@ export function ImportExport({ onExport, onImport, tasksCount }: ImportExportPro
           <li>• Los archivos exportados incluyen todo el historial de cambios de estado</li>
           <li>• Al importar en modo "combinar", las tareas mantienen sus IDs únicos</li>
           <li>• Recomendamos hacer exportaciones periódicas como respaldo</li>
-          <li>• Los datos solo se almacenan en tu navegador (localStorage)</li>
+          <li>• Los datos se almacenan de forma segura en la nube con Supabase</li>
         </ul>
       </Card>
     </div>

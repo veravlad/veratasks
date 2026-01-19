@@ -305,7 +305,7 @@ export function useSupabaseTasks() {
     return JSON.stringify(exportData, null, 2)
   }, [tasks])
 
-  // Importar tareas desde JSON (migrar datos de localStorage a Supabase)
+  // Importar tareas desde JSON
   const importTasks = useCallback(async (jsonData: string, replaceExisting = false): Promise<boolean> => {
     try {
       const importData: ExportData = JSON.parse(jsonData)
