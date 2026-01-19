@@ -206,7 +206,7 @@ function ProjectCard({
             className="w-4 h-4 rounded-full"
             style={{ backgroundColor: project.color }}
           />
-          <h3 className="font-medium truncate flex-1">{project.name}</h3>
+          <h3 className="font-medium flex-1">{project.name}</h3>
           {isArchived && (
             <Badge variant="secondary" className="text-xs">
               Archivado
