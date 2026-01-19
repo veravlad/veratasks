@@ -19,7 +19,7 @@ import { ImportExport } from './components/ImportExport'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { useSupabaseTasks } from './hooks/useSupabaseTasks'
 import { useAuthStore } from './stores/authStore'
-import type { CreateTaskData } from './schemas/task'
+import type { CreateTaskData, UpdateTaskData } from './schemas/task'
 import type { LucideIcon } from 'lucide-react'
 
 type View = 'tasks' | 'stats' | 'import-export'
@@ -59,6 +59,7 @@ const NavigationButton = ({
 function AppContent() {
   const [currentView, setCurrentView] = useState<View>('tasks')
   const [showTaskForm, setShowTaskForm] = useState(false)
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const { user, signOut } = useAuthStore()
   
   const {
@@ -67,6 +68,7 @@ function AppContent() {
     isLoading,
     error,
     createTask,
+    updateTask,
     deleteTask,
     startTask,
     pauseTask,
@@ -85,16 +87,41 @@ function AppContent() {
   }
 
   const activeTask = activeTaskId ? getTask(activeTaskId) : null
+  const editingTask = editingTaskId ? getTask(editingTaskId) : null
 
   const handleCreateTask = (data: CreateTaskData) => {
     createTask(data)
     setShowTaskForm(false)
   }
 
+  const handleUpdateTask = async (data: UpdateTaskData) => {
+    if (!editingTaskId) return
+    
+    try {
+      await updateTask(editingTaskId, data)
+      setEditingTaskId(null)
+      setShowTaskForm(false)
+    } catch (error) {
+      console.error('Error al actualizar tarea:', error)
+    }
+  }
+
+  const handleTaskSubmit = (data: CreateTaskData | UpdateTaskData) => {
+    if (editingTaskId) {
+      handleUpdateTask(data as UpdateTaskData)
+    } else {
+      handleCreateTask(data as CreateTaskData)
+    }
+  }
+
   const handleEditTask = (taskId: string) => {
-    // Por ahora, solo mostramos el formulario
-    // En una implementación completa, cargaríamos los datos de la tarea
-    console.log('Editar tarea:', taskId)
+    setEditingTaskId(taskId)
+    setShowTaskForm(true)
+  }
+
+  const handleCancelForm = () => {
+    setShowTaskForm(false)
+    setEditingTaskId(null)
   }
 
   return (
@@ -227,13 +254,14 @@ function AppContent() {
               </div>
             )}
 
-            {/* Formulario de nueva tarea (modal simple) */}
+            {/* Formulario de tarea (modal simple) */}
             {showTaskForm && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg max-w-md w-full mx-4">
                   <TaskForm
-                    onSubmit={handleCreateTask}
-                    onCancel={() => setShowTaskForm(false)}
+                    onSubmit={handleTaskSubmit}
+                    onCancel={handleCancelForm}
+                    editingTask={editingTask || undefined}
                   />
                 </div>
               </div>

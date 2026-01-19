@@ -1,38 +1,48 @@
 /**
- * Formulario para crear nuevas tareas
+ * Formulario para crear y editar tareas
  */
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus } from 'lucide-react';
+import { Plus, Edit3 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Card } from './ui/card';
-import { CreateTaskSchema, type CreateTaskData } from '../schemas/task';
+import { CreateTaskSchema, UpdateTaskSchema, type CreateTaskData, type UpdateTaskData } from '../schemas/task';
+import type { Task } from '../types/task';
 
 interface TaskFormProps {
-  onSubmit: (data: CreateTaskData) => void;
+  onSubmit: (data: CreateTaskData | UpdateTaskData) => void;
   onCancel?: () => void;
   isOpen?: boolean;
+  editingTask?: Task;
 }
 
-export function TaskForm({ onSubmit, onCancel, isOpen = true }: TaskFormProps) {
+export function TaskForm({ onSubmit, onCancel, isOpen = true, editingTask }: TaskFormProps) {
+  const isEditing = !!editingTask;
+  const schema = isEditing ? UpdateTaskSchema : CreateTaskSchema;
+  
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<CreateTaskData>({
-    resolver: zodResolver(CreateTaskSchema),
-    defaultValues: {
+  } = useForm<CreateTaskData | UpdateTaskData>({
+    resolver: zodResolver(schema),
+    defaultValues: isEditing ? {
+      title: editingTask.title,
+      description: editingTask.description || '',
+      priority: editingTask.priority,
+      estimatedTime: editingTask.estimatedTime,
+    } : {
       title: '',
       description: '',
       priority: 'medium',
     },
   });
 
-  const handleFormSubmit = (data: CreateTaskData) => {
+  const handleFormSubmit = (data: CreateTaskData | UpdateTaskData) => {
     onSubmit(data);
     reset();
   };
@@ -42,8 +52,17 @@ export function TaskForm({ onSubmit, onCancel, isOpen = true }: TaskFormProps) {
   return (
     <Card className="p-6">
       <div className="flex items-center gap-2 mb-4">
-        <Plus className="w-5 h-5" />
-        <h2 className="text-lg font-semibold">Nueva Tarea</h2>
+        {isEditing ? (
+          <>
+            <Edit3 className="w-5 h-5" />
+            <h2 className="text-lg font-semibold">Editar Tarea</h2>
+          </>
+        ) : (
+          <>
+            <Plus className="w-5 h-5" />
+            <h2 className="text-lg font-semibold">Nueva Tarea</h2>
+          </>
+        )}
       </div>
 
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
@@ -107,7 +126,7 @@ export function TaskForm({ onSubmit, onCancel, isOpen = true }: TaskFormProps) {
 
         <div className="flex gap-2 pt-2">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creando...' : 'Crear Tarea'}
+            {isSubmitting ? (isEditing ? 'Actualizando...' : 'Creando...') : (isEditing ? 'Actualizar Tarea' : 'Crear Tarea')}
           </Button>
           {onCancel && (
             <Button type="button" variant="secondary" onClick={onCancel}>
