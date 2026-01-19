@@ -6,7 +6,6 @@ import {
   ListTodo, 
   Plus, 
   BarChart3, 
-  FileText,
   PlayCircle,
   PauseCircle,
   LogOut,
@@ -16,7 +15,6 @@ import { Button } from './components/ui/button'
 import { TaskForm } from './components/TaskForm'
 import { TaskList } from './components/TaskList'
 import { TaskStats } from './components/TaskStats'
-import { ImportExport } from './components/ImportExport'
 import { ProjectList } from './components/ProjectList'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { useSupabaseTasks } from './hooks/useSupabaseTasks'
@@ -24,7 +22,7 @@ import { useAuthStore } from './stores/authStore'
 import type { CreateTaskData, UpdateTaskData } from './schemas/task'
 import type { LucideIcon } from 'lucide-react'
 
-type View = 'tasks' | 'projects' | 'stats' | 'import-export'
+type View = 'tasks' | 'projects' | 'stats'
 
 interface NavigationButtonProps {
   view: View;
@@ -79,8 +77,6 @@ function AppContent() {
     pauseTask,
     completeTask,
     cancelTask,
-    exportTasks,
-    importTasks,
     getTask,
   } = useSupabaseTasks()
 
@@ -208,13 +204,6 @@ function AppContent() {
                 currentView={currentView}
                 onViewChange={setCurrentView}
               />
-              <NavigationButton
-                view="import-export"
-                icon={FileText}
-                label="Importar/Exportar"
-                currentView={currentView}
-                onViewChange={setCurrentView}
-              />
               
               <hr className="my-4" />
               
@@ -328,25 +317,6 @@ function AppContent() {
                     <TaskStats tasks={tasks} />
                   </div>
                 )}
-
-                {currentView === 'import-export' && (
-                  <div>
-                    <div className="mb-6">
-                      <h2 className="text-xl font-semibold">Gestión de Datos</h2>
-                      <p className="text-gray-600">
-                        Exporta o importa tus tareas para crear respaldos
-                      </p>
-                    </div>
-                    
-                    <ImportExport
-                      onExport={exportTasks}
-                      onImport={importTasks}
-                      tasksCount={tasks.length}
-                    />
-                  </div>
-                )}
-
-
               </>
             )}
           </main>

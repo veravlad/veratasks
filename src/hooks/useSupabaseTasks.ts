@@ -5,7 +5,7 @@ import { useState, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase, type TaskRow, type TaskHistoryRow, type TaskInsert, type ProjectRow } from '../lib/supabase'
 import { useAuthStore } from '../stores/authStore'
-import type { Task, TaskStatus, ExportData } from '../types/task'
+import type { Task, TaskStatus } from '../types/task'
 import type { CreateTaskData, UpdateTaskData } from '../schemas/task'
 import { calculateTimeInMinutes } from '../utils/task'
 
@@ -330,82 +330,7 @@ export function useSupabaseTasks() {
     return tasks.filter(task => task.status === status)
   }, [tasks])
 
-  // Exportar tareas (mantener compatibilidad con el formato anterior)
-  const exportTasks = useCallback((): string => {
-    const exportData: ExportData = {
-      tasks,
-      projects: [], // Por ahora no exportamos proyectos desde este hook
-      exportedAt: new Date(),
-      version: '1.0.0',
-    }
 
-    return JSON.stringify(exportData, null, 2)
-  }, [tasks])
-
-  // Importar tareas desde JSON
-  const importTasks = useCallback(async (jsonData: string, replaceExisting = false): Promise<boolean> => {
-    try {
-      if (!userId) throw new Error('User not authenticated')
-      
-      const importData: ExportData = JSON.parse(jsonData)
-
-      if (!importData.tasks || !Array.isArray(importData.tasks)) {
-        throw new Error('Formato de datos inválido')
-      }
-
-      if (replaceExisting) {
-        // Eliminar todas las tareas existentes
-        const { error: deleteHistoryError } = await supabase
-          .from('task_history')
-          .delete()
-          .in('task_id', tasks.map(t => t.id))
-
-        if (deleteHistoryError) throw deleteHistoryError
-
-        const { error: deleteTasksError } = await supabase
-          .from('tasks')
-          .delete()
-          .eq('user_id', userId)
-
-        if (deleteTasksError) throw deleteTasksError
-      }
-
-      // Insertar tareas importadas
-      for (const task of importData.tasks) {
-        const taskId = replaceExisting ? task.id : crypto.randomUUID()
-        
-        // Insertar tarea
-        const taskData = {
-          ...mapTaskToTaskInsert({ ...task, id: taskId }, userId),
-        }
-        const { error: taskError } = await supabase
-          .from('tasks')
-          .insert([taskData as TaskInsert])
-
-        if (taskError) throw taskError
-
-        // Insertar historial
-        for (const history of task.statusHistory) {
-          const { error: historyError } = await supabase
-            .from('task_history')
-            .insert([{
-              task_id: taskId,
-              status: history.status,
-              changed_at: history.changedAt.toISOString(),
-              time_in_status: history.timeInStatus || null,
-            }])
-
-          if (historyError) throw historyError
-        }
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['tasks', userId] })
-      return true
-    } catch (error) {
-      console.error('Error importing tasks:', error)
-      return false
-    }
-  }, [tasks, queryClient, userId])
 
   const clearAllTasks = useCallback(async () => {
     if (!userId) throw new Error('User not authenticated')
@@ -456,10 +381,6 @@ export function useSupabaseTasks() {
     // Utilidades
     getTask,
     getTasksByStatus,
-    
-    // Importar/Exportar
-    exportTasks,
-    importTasks,
     clearAllTasks,
   }
 }

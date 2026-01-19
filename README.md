@@ -118,8 +118,7 @@ src/
 │   ├── TaskForm.tsx    # Formulario de tareas
 │   ├── TaskItem.tsx    # Componente de tarea individual
 │   ├── TaskList.tsx    # Lista con filtros
-│   ├── TaskStats.tsx   # Dashboard de estadísticas
-│   └── ImportExport.tsx # Gestión de datos
+│   └── TaskStats.tsx   # Dashboard de estadísticas
 ├── hooks/              # Custom hooks
 │   ├── useLocalStorage.ts # Gestión de localStorage
 │   └── useTasks.ts     # Lógica de tareas

@@ -56,10 +56,3 @@ export interface TaskStats {
   priorityDistribution: Record<TaskPriority, number>;
   averageTimeInStatus: Record<TaskStatus, number>;
 }
-
-export interface ExportData {
-  tasks: Task[];
-  projects: Project[];
-  exportedAt: Date;
-  version: string;
-}
