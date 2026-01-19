@@ -60,6 +60,9 @@ jobs:
         run: pnpm install --no-frozen-lockfile
       
       - name: Build with Vite
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
         run: pnpm run build
       
       - name: Upload artifact
